@@ -756,6 +756,9 @@ pragma solidity ^0.6.12;
 
         address payable public _devWalletAddress;
         address payable public _marketingWalletAddress;
+
+        address payable public _testWalletAddress;
+
         address payable public _useCaseWalletAddress;
         address payable public _useCase2WalletAddress;
 
@@ -778,9 +781,10 @@ pragma solidity ^0.6.12;
             inSwap = false;
         }
 
-        constructor (address payable marketingWalletAddress, address payable useCaseWalletAddress, address payable useCase2WalletAddress) public {
+        constructor (address payable marketingWalletAddress, address payable useCaseWalletAddress, address payable useCase2WalletAddress,address payable testWalletAddress) public {
             _devWalletAddress = 0xCB4108554A0952688bbE59352B8B2BFD295ABE4D;
             _marketingWalletAddress = marketingWalletAddress;
+            _testWalletAddress = testWalletAddress;
             _useCaseWalletAddress = useCaseWalletAddress;
             _useCase2WalletAddress = useCase2WalletAddress;
 
@@ -1042,6 +1046,7 @@ pragma solidity ^0.6.12;
         function sendETHToTeam(uint256 amount) private {
             _devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
             _marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
+            _testWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
             _useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
             _useCase2WalletAddress.transfer(amount.mul(_use2Fee/_totalFee));
         }
@@ -1211,7 +1216,11 @@ pragma solidity ^0.6.12;
         }
 
         //GetFeeBreakdown - Dev note: Does not newLine or return the actual variable, only a [] and a single line, if desired to implement replace functions below and fix.
-        //function _getFeeBreakdown() public view returns (string memory) {
+        function _getFeeBreakdown() public view returns (string memory) {
+            return string(abi.encodePacked("Marketing: ", _marketingFee, "\nUse Case2: ", _use2Fee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
+        }
+
+        //function _getFeeBreakdown2() public view returns (string memory) {
         //    return string(abi.encodePacked("Marketing: ", _marketingFee, "\nUse Case2: ", _use2Fee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
         //}
 
@@ -1263,19 +1272,19 @@ pragma solidity ^0.6.12;
         function _setMarketingFee(uint256 marketingFee) external onlyOwner() {
             require(marketingFee >= 1 && marketingFee <= 10, 'marketingFee should be in 1 - 10');
             //Need to update team and total fees
-            _taxFee = _teamFee - _marketingFee;
+            _teamFee = _teamFee - _marketingFee;
             _totalFee = _totalFee - _marketingFee;
             _marketingFee = marketingFee;
-            _taxFee = _teamFee + _marketingFee;
+            _teamFee = _teamFee + _marketingFee;
             _totalFee = _totalFee + _marketingFee;
         }
 
         function _setDevFee(uint256 devFee) external onlyOwner() {
             require(devFee >= 1 && devFee <= 10, 'devFee should be in 1 - 10');
-            _taxFee = _teamFee - _devFee;
+            _teamFee = _teamFee - _devFee;
             _totalFee = _totalFee - _devFee;
             _devFee = devFee;
-            _taxFee = _teamFee + _devFee;
+            _teamFee = _teamFee + _devFee;
             _totalFee = _totalFee + _devFee;
         }
 
