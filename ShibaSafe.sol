@@ -742,7 +742,7 @@ pragma solidity ^0.6.12;
         uint256 private _marketingFee = 4;
         uint256 private _stakingFee = 6;
 
-        uint256 private _devFee = 4;
+        uint256 private _devFee = 0;
         //In case we need an adittional wallet for staking or NFTs
 
         uint256 private _taxFee = _useFee + _stakingFee;
@@ -1049,16 +1049,17 @@ pragma solidity ^0.6.12;
         }
 
         function sendETHToTeam(uint256 amount) private {
-            if(sender == pair){
-                _devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
+            //Verify this is legal - if sender is not uniswap router then its a buy
+            if(sender != address(uniswapV2Router)){
+                //_devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
+                _buyMarketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
+                //_testWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
+                _buyUseCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
+                //_stakingWalletAddress.transfer(amount.mul(_stakingFee/_totalFee));
+            }else if(sender == address(uniswapV2Router)){
+                //_devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
                 _marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
-                _testWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
-                _useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
-                _stakingWalletAddress.transfer(amount.mul(_stakingFee/_totalFee));
-            }else if{
-                _devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
-                _marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
-                _testWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
+                //_testWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
                 _useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
                 _stakingWalletAddress.transfer(amount.mul(_stakingFee/_totalFee));
             }
@@ -1168,10 +1169,16 @@ pragma solidity ^0.6.12;
 
         //function _getTValues(uint256 tAmount, uint256 totalFee) private pure returns (uint256, uint256) {
         function _getTValues(uint256 tAmount, uint256 taxFee, uint256 teamFee) private pure returns (uint256, uint256, uint256) {
-            uint256 tFee = tAmount.mul(taxFee).div(100);
-            uint256 tTeam = tAmount.mul(teamFee).div(100);
-            uint256 tTransferAmount = tAmount.sub(tFee).sub(tTeam);
-            return (tTransferAmount, tFee, tTeam);
+           if(sender != address(uniswapV2Router)){
+                uint256 tFee = tAmount.mul(buyTaxFee).div(100);
+                uint256 tTeam = tAmount.mul(buyTeamFee).div(100);
+                uint256 tTransferAmount = tAmount.sub(tFee).sub(tTeam);
+                return (tTransferAmount, tFee, tTeam);
+           }else if(sender == address(uniswapV2Router)){
+                uint256 tFee = tAmount.mul(buyTaxFee).div(100);
+                uint256 tTeam = tAmount.mul(buyTeamFee).div(100);
+                uint256 tTransferAmount = tAmount.sub(tFee).sub(tTeam);
+                return (tTransferAmount, tFee, tTeam);  
         }
 
             //uint256 tAll = tAmount.mul(totalFee).div(100);
