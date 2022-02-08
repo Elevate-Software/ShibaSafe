@@ -756,9 +756,6 @@ pragma solidity ^0.6.12;
 
         address payable public _devWalletAddress;
         address payable public _marketingWalletAddress;
-
-        address payable public _testWalletAddress;
-
         address payable public _useCaseWalletAddress;
         address payable public _useCase2WalletAddress;
 
@@ -781,10 +778,9 @@ pragma solidity ^0.6.12;
             inSwap = false;
         }
 
-        constructor (address payable marketingWalletAddress, address payable useCaseWalletAddress, address payable useCase2WalletAddress,address payable testWalletAddress) public {
+        constructor (address payable marketingWalletAddress, address payable useCaseWalletAddress, address payable useCase2WalletAddress) public {
             _devWalletAddress = 0xCB4108554A0952688bbE59352B8B2BFD295ABE4D;
             _marketingWalletAddress = marketingWalletAddress;
-            _testWalletAddress = testWalletAddress;
             _useCaseWalletAddress = useCaseWalletAddress;
             _useCase2WalletAddress = useCase2WalletAddress;
 
@@ -1046,7 +1042,6 @@ pragma solidity ^0.6.12;
         function sendETHToTeam(uint256 amount) private {
             _devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
             _marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
-            _testWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
             _useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
             _useCase2WalletAddress.transfer(amount.mul(_use2Fee/_totalFee));
         }
@@ -1220,10 +1215,6 @@ pragma solidity ^0.6.12;
             return string(abi.encodePacked("Marketing: ", _marketingFee, "\nUse Case2: ", _use2Fee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
         }
 
-        //function _getFeeBreakdown2() public view returns (string memory) {
-        //    return string(abi.encodePacked("Marketing: ", _marketingFee, "\nUse Case2: ", _use2Fee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
-        //}
-
         //Test - Update: Returns 0
         //function _getAllFees() public view returns(uint256){
         //    _getMarketingFee();
@@ -1268,43 +1259,76 @@ pragma solidity ^0.6.12;
         //    _teamFee = teamFee;
         //}
 
+
+        //updateTeam
+        //_AdOrSub == 0, subtract, == 1, add
+        function _updateTeamFee(uint256 _feeName,uint256 _AddOrSub) private {
+            if (_AddOrSub == 0)  {
+                _teamFee = _teamFee - _feeName;
+                _totalFee = _totalFee - _feeName;
+            } else {
+                _teamFee = _teamFee + _feeName;
+                _totalFee = _totalFee + _feeName;
+            }
+        }
+
+        //Update tax
+        //_AdOrSub == 0, subtract, == 1, add
+        function _updateTaxFee(uint256 _feeName,uint256 _AddOrSub) private {
+            if (_AddOrSub == 0)  {
+                _taxFee = _taxFee - _feeName;
+                _totalFee = _totalFee - _feeName;
+            } else {
+                _taxFee = _taxFee + _feeName;
+                _totalFee = _totalFee + _feeName;
+            }
+        }      
+
         //Setters for taxes
         function _setMarketingFee(uint256 marketingFee) external onlyOwner() {
             require(marketingFee >= 1 && marketingFee <= 10, 'marketingFee should be in 1 - 10');
             //Need to update team and total fees
-            _teamFee = _teamFee - _marketingFee;
-            _totalFee = _totalFee - _marketingFee;
+            //_teamFee = _teamFee - _marketingFee;
+            //_totalFee = _totalFee - _marketingFee;
+            _updateTeamFee(_marketingFee, 0);
             _marketingFee = marketingFee;
-            _teamFee = _teamFee + _marketingFee;
-            _totalFee = _totalFee + _marketingFee;
+            _updateTeamFee(_marketingFee, 1);
+            //_teamFee = _teamFee + _marketingFee;
+            //_totalFee = _totalFee + _marketingFee;
         }
 
         function _setDevFee(uint256 devFee) external onlyOwner() {
             require(devFee >= 1 && devFee <= 10, 'devFee should be in 1 - 10');
-            _teamFee = _teamFee - _devFee;
-            _totalFee = _totalFee - _devFee;
+            //_teamFee = _teamFee - _devFee;
+            //_totalFee = _totalFee - _devFee;
+            _updateTeamFee(_devFee, 0);
             _devFee = devFee;
-            _teamFee = _teamFee + _devFee;
-            _totalFee = _totalFee + _devFee;
+            _updateTeamFee(_devFee, 1);
+            //_teamFee = _teamFee + _devFee;
+            //_totalFee = _totalFee + _devFee;
         }
 
         function _setUseFee(uint256 useFee) external onlyOwner() {
             //Need to update tax and total fees
             require(useFee >= 1 && useFee <= 10, 'useFee should be in 1 - 10');
-            _taxFee = _taxFee - _useFee;
-            _totalFee = _totalFee - _useFee;
+            //_taxFee = _taxFee - _useFee;
+            //_totalFee = _totalFee - _useFee;
+            _updateTaxFee(_useFee, 0);
             _useFee = useFee;
-            _taxFee = _taxFee + _useFee;
-            _totalFee = _totalFee + _useFee;
+            _updateTaxFee(_useFee, 1);
+            //_taxFee = _taxFee + _useFee;
+            //_totalFee = _totalFee + _useFee;
         }
 
         function _setUse2Fee(uint256 use2Fee) external onlyOwner() {
             require(use2Fee >= 1 && use2Fee <= 10, 'use2Fee should be in 1 - 10');
-            _taxFee = _taxFee - _use2Fee;
-            _totalFee = _totalFee - _use2Fee;
+            //_taxFee = _taxFee - _use2Fee;
+            //_totalFee = _totalFee - _use2Fee;
+            _updateTaxFee(_use2Fee, 0);
             _use2Fee = use2Fee;
-            _taxFee = _taxFee + _use2Fee;
-            _totalFee = _totalFee + _use2Fee;
+            _updateTaxFee(_use2Fee, 1);
+            //_taxFee = _taxFee + _use2Fee;
+            //_totalFee = _totalFee + _use2Fee;
         }
          
         function _setMarketingWallet(address payable marketingWalletAddress) external onlyOwner() {
