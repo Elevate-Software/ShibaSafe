@@ -1,4 +1,4 @@
-// Prove Zero Token
+// Shiba Safe Token
 // Developed by Elevate Software
 // elevatesoftware.io
 // @elevatesoftware
