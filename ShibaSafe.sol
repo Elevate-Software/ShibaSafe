@@ -1206,14 +1206,14 @@ pragma solidity ^0.6.12;
         }
 
         //Get total Fees
-        function _getTotalFee() public view returns(uint256) {
-            return _totalFee;
-        }
+        //function _getTotalFee() public view returns(uint256) {
+        //    return _totalFee;
+        //}
 
         //GetFeeBreakdown - Dev note: Does not newLine or return the actual variable, only a [] and a single line, if desired to implement replace functions below and fix.
-        function _getFeeBreakdown() public view returns (string memory) {
-            return string(abi.encodePacked("Marketing: ", _marketingFee, "\nUse Case2: ", _use2Fee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
-        }
+        //function _getFeeBreakdown() public view returns (string memory) {
+        //    return string(abi.encodePacked("Marketing: ", _marketingFee, "\nUse Case2: ", _use2Fee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
+        //}
 
         //Test - Update: Returns 0
         //function _getAllFees() public view returns(uint256){
