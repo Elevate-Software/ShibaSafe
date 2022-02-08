@@ -1281,43 +1281,76 @@ pragma solidity ^0.6.12;
         //    _teamFee = teamFee;
         //}
 
+
+        //updateTeam
+        //_AdOrSub == 0, subtract, == 1, add
+        function _updateTeamFee(uint256 _feeName,uint256 _AddOrSub) private {
+            if (_AddOrSub == 0)  {
+                _teamFee = _teamFee - _feeName;
+                _totalFee = _totalFee - _feeName;
+            } else if (_AddOrSub == 1) {
+                _teamFee = _teamFee + _feeName;
+                _totalFee = _totalFee + _feeName;
+            }
+        }
+
+        //Update tax
+        //_AdOrSub == 0, subtract, == 1, add
+        function _updateTaxFee(uint256 _feeName,uint256 _AddOrSub) private {
+            if (_AddOrSub == 0)  {
+                _taxFee = _taxFee - _feeName;
+                _totalFee = _totalFee - _feeName;
+            } else if (_AddOrSub == 1){
+                _taxFee = _taxFee + _feeName;
+                _totalFee = _totalFee + _feeName;
+            }
+        }      
+
         //Setters for taxes
         function _setMarketingFee(uint256 marketingFee) external onlyOwner() {
             require(marketingFee >= 1 && marketingFee <= 10, 'marketingFee should be in 1 - 10');
             //Need to update team and total fees
-            _teamFee = _teamFee - _marketingFee;
-            _totalFee = _totalFee - _marketingFee;
+            //_teamFee = _teamFee - _marketingFee;
+            //_totalFee = _totalFee - _marketingFee;
+            _updateTeamFee(_marketingFee, 0);
             _marketingFee = marketingFee;
-            _teamFee = _teamFee + _marketingFee;
-            _totalFee = _totalFee + _marketingFee;
+            _updateTeamFee(_marketingFee, 1);
+            //_teamFee = _teamFee + _marketingFee;
+            //_totalFee = _totalFee + _marketingFee;
         }
 
         function _setDevFee(uint256 devFee) external onlyOwner() {
             require(devFee >= 1 && devFee <= 10, 'devFee should be in 1 - 10');
-            _teamFee = _teamFee - _devFee;
-            _totalFee = _totalFee - _devFee;
+            //_teamFee = _teamFee - _devFee;
+            //_totalFee = _totalFee - _devFee;
+            _updateTeamFee(_devFee, 0);
             _devFee = devFee;
-            _teamFee = _teamFee + _devFee;
-            _totalFee = _totalFee + _devFee;
+            _updateTeamFee(_devFee, 1);
+            //_teamFee = _teamFee + _devFee;
+            //_totalFee = _totalFee + _devFee;
         }
 
         function _setUseFee(uint256 useFee) external onlyOwner() {
             //Need to update tax and total fees
             require(useFee >= 1 && useFee <= 10, 'useFee should be in 1 - 10');
-            _taxFee = _taxFee - _useFee;
-            _totalFee = _totalFee - _useFee;
+            //_taxFee = _taxFee - _useFee;
+            //_totalFee = _totalFee - _useFee;
+            _updateTaxFee(_useFee, 0);
             _useFee = useFee;
-            _taxFee = _taxFee + _useFee;
-            _totalFee = _totalFee + _useFee;
+            _updateTaxFee(_useFee, 1);
+            //_taxFee = _taxFee + _useFee;
+            //_totalFee = _totalFee + _useFee;
         }
 
-        function _setStakingFee(uint256 stakingFee) external onlyOwner() {
-            require(stakingFee >= 1 && stakingFee <= 10, 'stakingFee should be in 1 - 10');
-            _taxFee = _taxFee - _stakingFee;
-            _totalFee = _totalFee - _stakingFee;
-            _stakingFee = stakingFee;
-            _taxFee = _taxFee + _stakingFee;
-            _totalFee = _totalFee + _stakingFee;
+        function _setUse2Fee(uint256 use2Fee) external onlyOwner() {
+            require(use2Fee >= 1 && use2Fee <= 10, 'use2Fee should be in 1 - 10');
+            //_taxFee = _taxFee - _use2Fee;
+            //_totalFee = _totalFee - _use2Fee;
+            _updateTaxFee(_use2Fee, 0);
+            _use2Fee = use2Fee;
+            _updateTaxFee(_use2Fee, 1);
+            //_taxFee = _taxFee + _use2Fee;
+            //_totalFee = _totalFee + _use2Fee;
         }
          
         function _setMarketingWallet(address payable marketingWalletAddress) external onlyOwner() {
@@ -1328,8 +1361,8 @@ pragma solidity ^0.6.12;
             _useCaseWalletAddress = useCaseWalletAddress;
         }
 
-        function _setStakingWallet(address payable stakingWalletAddress) external onlyOwner() {
-            _stakingWalletAddress = stakingWalletAddress;
+        function _setUse2Wallet(address payable useCase2WalletAddress) external onlyOwner() {
+            _useCase2WalletAddress = useCase2WalletAddress;
         }
 
         function _setMaxTxAmount(uint256 maxTxAmount) external onlyOwner() {
