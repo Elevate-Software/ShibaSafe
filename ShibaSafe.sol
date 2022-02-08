@@ -1266,7 +1266,7 @@ pragma solidity ^0.6.12;
             if (_AddOrSub == 0)  {
                 _teamFee = _teamFee - _feeName;
                 _totalFee = _totalFee - _feeName;
-            } else {
+            } else if (_AddOrSub == 1) {
                 _teamFee = _teamFee + _feeName;
                 _totalFee = _totalFee + _feeName;
             }
@@ -1278,7 +1278,7 @@ pragma solidity ^0.6.12;
             if (_AddOrSub == 0)  {
                 _taxFee = _taxFee - _feeName;
                 _totalFee = _totalFee - _feeName;
-            } else {
+            } else if (_AddOrSub == 1){
                 _taxFee = _taxFee + _feeName;
                 _totalFee = _totalFee + _feeName;
             }
