@@ -708,7 +708,7 @@ pragma solidity ^0.6.12;
         ) external;
     }
 
-    contract ProveZero is Context, IERC20, Ownable {
+    contract ShibaSafe is Context, IERC20, Ownable {
         using SafeMath for uint256;
         using Address for address;
 
@@ -729,42 +729,56 @@ pragma solidity ^0.6.12;
         uint256 private _rTotal = (MAX - (MAX % _tTotal));
         uint256 private _tFeeTotal;
 
-        string private constant _name = 'ProveZero';
-        string private constant _symbol = 'PROVE';
+        string private constant _name = 'ShibaSafe';
+        string private constant _symbol = 'ShibSafe';
         uint8 private constant _decimals = 18;
 
         //Buy Token Fees
         uint256 private _buyUseFee = 6;
-        uint256 private _buyMarketingFee = 6;        
+        uint256 private _buyMarketingFee = 6;
+
+        uint256 private _buyTaxFee = _buyUseFee;
+        uint256 private _buyTeamFee = _buyMarketingFee + _devFee;
+
+        uint256 private _buyTotalFee = (_buyMarketingFee + _devFee + _buyUseFee);
         
         //Sell Token Fees
         uint256 private _useFee = 2;
         uint256 private _marketingFee = 4;
         uint256 private _stakingFee = 6;
 
-        uint256 private _devFee = 0;
-        //In case we need an adittional wallet for staking or NFTs
-
         uint256 private _taxFee = _useFee + _stakingFee;
         uint256 private _teamFee = _marketingFee + _devFee;
 
-        //Total Fee
         uint256 private _totalFee = (_marketingFee + _stakingFee + _devFee + _useFee);
+
+        uint256 private _devFee = 0;
+        //In case we need an adittional wallet for staking or NFTs
+
+
+
+
 
         //Store  prior fees for restoreAllFee
         uint256 private _previousTaxFee = _taxFee;
+        uint256 private _previousBuyTaxFee = _buyTaxFee;
         uint256 private _previousTeamFee = _teamFee;
+        uint256 private _previousBuyTeamFee = _buyTeamFee;       
         uint256 private _previousMarketingFee = _marketingFee;
+        uint256 private _previousBuyMarketingFee = _buyMarketingFee;
         uint256 private _previousDevFee = _devFee;
         uint256 private _previousUseFee = _useFee;
+        uint256 private _previousBuyUseFee = _buyUseFee;
         uint256 private _previousStakingFee = _stakingFee;
 
         address payable public _devWalletAddress;
         address payable public _marketingWalletAddress;
+        address payable public _buyMarketingWalletAddress;
 
         address payable public _testWalletAddress;
 
         address payable public _useCaseWalletAddress;
+        address payable public _buyUseCaseWalletAddress;
         address payable public _stakingWalletAddress;
 
         IUniswapV2Router02 public immutable uniswapV2Router;
@@ -960,6 +974,25 @@ pragma solidity ^0.6.12;
             _useFee = 0;
         }
 
+
+        function removeAllBuyFee() private {
+        if(_buyTaxFee == 0 && _buyTeamFee == 0 && _buyTotalFee == 0) return;
+            //if (_totalFee == 0) return; 
+
+            _previousBuyTaxFee = _buyTaxFee;
+            _previousBuyTeamFee = _buyTeamFee;
+            _previousBuyMarketingFee = _buyMarketingFee;
+            _previousDevFee = _devFee;
+            _previousBuyUseFee = _buyUseFee;
+
+            _buyTaxFee = 0;
+            _buyTeamFee = 0;
+            _buyMarketingFee = 0;
+            _devFee = 0;
+            _buyUseFee = 0;
+        }
+
+
         function restoreAllFee() private {
             _taxFee = _previousTaxFee;
             _teamFee = _previousTeamFee;
@@ -968,6 +1001,14 @@ pragma solidity ^0.6.12;
             _devFee = _previousDevFee;
             _useFee = _previousUseFee;
 
+        }
+
+        function restoreAllBuyFee() private {
+            _buyTaxFee = _previousBuyTaxFee;
+            _buyTeamFee = _previousBuyTeamFee;
+            _buyMarketingFee = _previousBuyMarketingFee;
+            _devFee = _previousDevFee;
+            _buyUseFee = _buyPreviousUseFee;
         }
 
         function isExcludedFromFee(address account) public view returns(bool) {
@@ -1052,9 +1093,9 @@ pragma solidity ^0.6.12;
             //Verify this is legal - if sender is not uniswap router then its a buy
             if(sender != address(uniswapV2Router)){
                 //_devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
-                _buyMarketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
+                _buyMarketingWalletAddress.transfer(amount.mul(_buyMarketingFee/_buyTotalFee));
                 //_testWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
-                _buyUseCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
+                _buyUseCaseWalletAddress.transfer(amount.mul(_buyUseFee/_buyTotalFee));
                 //_stakingWalletAddress.transfer(amount.mul(_stakingFee/_totalFee));
             }else if(sender == address(uniswapV2Router)){
                 //_devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
@@ -1157,7 +1198,7 @@ pragma solidity ^0.6.12;
         receive() external payable {}
 
         function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
-        (uint256 tTransferAmount, uint256 tFee, uint256 tTeam) = _getTValues(tAmount, _taxFee, _teamFee);
+        (uint256 tTransferAmount, uint256 tFee, uint256 tTeam) = _getTValues(tAmount, _taxFee, _teamFee, _buyTaxFee, _buyTeamFee);
         //(uint256 tTransferAmount, uint256 tAll) = _getTValues(tAmount, _totalFee);
 
         uint256 currentRate = _getRate();
@@ -1168,7 +1209,7 @@ pragma solidity ^0.6.12;
     }
 
         //function _getTValues(uint256 tAmount, uint256 totalFee) private pure returns (uint256, uint256) {
-        function _getTValues(uint256 tAmount, uint256 taxFee, uint256 teamFee) private pure returns (uint256, uint256, uint256) {
+        function _getTValues(uint256 tAmount, uint256 taxFee, uint256 teamFee, uint256 buyTaxFee, uint256 buyTeamFee) private pure returns (uint256, uint256, uint256) {
            if(sender != address(uniswapV2Router)){
                 uint256 tFee = tAmount.mul(buyTaxFee).div(100);
                 uint256 tTeam = tAmount.mul(buyTeamFee).div(100);
@@ -1222,6 +1263,7 @@ pragma solidity ^0.6.12;
             return (rSupply, tSupply);
         }
 
+        //Get sell tax and team Fees
         function _getTaxFee() public view returns(uint256) {
             return _taxFee;
         }
@@ -1230,14 +1272,31 @@ pragma solidity ^0.6.12;
           return _teamFee;
         }
 
+        //Get buy tax and team Fees
+        function _getBuyTaxFee() public view returns(uint256) {
+            return _buyTaxFee;
+        }
+
+        function _getBuyTeamFee() public view returns (uint256) {
+          return _buyTeamFee;
+        }
+
         //Get total Fees
         function _getTotalFee() public view returns(uint256) {
             return _totalFee;
         }
 
+        function _getBuyTotalFee() public view returns(uint256) {
+            return _totalFee;
+        }       
+
         //GetFeeBreakdown - Dev note: Does not newLine or return the actual variable, only a [] and a single line, if desired to implement replace functions below and fix.
         function _getFeeBreakdown() public view returns (string memory) {
-            return string(abi.encodePacked("Marketing: ", _marketingFee, "\nUse Case2: ", _stakingFee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
+            return string(abi.encodePacked("Marketing: ", _marketingFee, "\nStaking: ", _stakingFee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
+        }
+
+        function _getBuyFeeBreakdown() public view returns (string memory) {
+            return string(abi.encodePacked("Buy Marketing: ", _buyMarketingFee, "\nDevelopment: ", _devFee, "\nBuy Use Case: ", _buyUseFee));
         }
 
         //function _getFeeBreakdown2() public view returns (string memory) {
@@ -1257,12 +1316,20 @@ pragma solidity ^0.6.12;
             return _marketingFee;
         }
 
+        function _getBuyMarketingFee() public view returns(uint256){
+            return _buyMarketingFee;
+        }
+
         function _getDevFee() public view returns(uint256){
             return _devFee;
         }
 
         function _getUseFee() public view returns(uint256){
             return _useFee;
+        }
+
+        function _getBuyUseFee() public view returns(uint256){
+            return _buyUseFee;
         }
 
         function _getStakingFee() public view returns(uint256){
@@ -1301,6 +1368,16 @@ pragma solidity ^0.6.12;
             }
         }
 
+        function _updateBuyTeamFee(uint256 _feeName,uint256 _AddOrSub) private {
+            if (_AddOrSub == 0)  {
+                _buyTeamFee = _buyTeamFee - _feeName;
+                _buyTotalFee = _buyTotalFee - _feeName;
+            } else if (_AddOrSub == 1) {
+                _buyTeamFee = _buyTeamFee + _feeName;
+                _buyTotalFee = _buyTotalFee + _feeName;
+            }
+        }
+
         //Update tax
         //_AdOrSub == 0, subtract, == 1, add
         function _updateTaxFee(uint256 _feeName,uint256 _AddOrSub) private {
@@ -1311,7 +1388,17 @@ pragma solidity ^0.6.12;
                 _taxFee = _taxFee + _feeName;
                 _totalFee = _totalFee + _feeName;
             }
-        }      
+        } 
+
+        function _updateBuyTaxFee(uint256 _feeName,uint256 _AddOrSub) private {
+            if (_AddOrSub == 0)  {
+                _buyTaxFee = _buyTaxFee - _feeName;
+                _buyTotalFee = _buyTotalFee - _feeName;
+            } else if (_AddOrSub == 1){
+                _buyTaxFee = _buyTaxFee + _feeName;
+                _buyTotalFee = _buyTotalFee + _feeName;
+            }
+        }     
 
         //Setters for taxes
         function _setMarketingFee(uint256 marketingFee) external onlyOwner() {
@@ -1324,6 +1411,13 @@ pragma solidity ^0.6.12;
             _updateTeamFee(_marketingFee, 1);
             //_teamFee = _teamFee + _marketingFee;
             //_totalFee = _totalFee + _marketingFee;
+        }
+
+        function _setBuyMarketingFee(uint256 buyMarketingFee) external onlyOwner() {
+            require(buyMarketingFee >= 1 && buyMarketingFee <= 10, 'buyMarketingFee should be in 1 - 10');
+            _updateBuyTeamFee(_buyMarketingFee, 0);
+            _buyMarketingFee = buyMarketingFee;
+            _updateBuyTeamFee(_buyMarketingFee, 1);
         }
 
         function _setDevFee(uint256 devFee) external onlyOwner() {
@@ -1349,13 +1443,25 @@ pragma solidity ^0.6.12;
             //_totalFee = _totalFee + _useFee;
         }
 
-        function _setUse2Fee(uint256 use2Fee) external onlyOwner() {
+        function _setBuyUseFee(uint256 buyUseFee) external onlyOwner() {
+            //Need to update tax and total fees
+            require(buyUseFee >= 1 && buyUseFee <= 10, 'useFee should be in 1 - 10');
+            //_taxFee = _taxFee - _useFee;
+            //_totalFee = _totalFee - _useFee;
+            _updateBuyTaxFee(_buyUseFee, 0);
+            _buyUseFee = buyUseFee;
+            _updateBuyTaxFee(_buyUseFee, 1);
+            //_taxFee = _taxFee + _useFee;
+            //_totalFee = _totalFee + _useFee;
+        }
+
+        function _setStakingFee(uint256 use2Fee) external onlyOwner() {
             require(use2Fee >= 1 && use2Fee <= 10, 'use2Fee should be in 1 - 10');
             //_taxFee = _taxFee - _use2Fee;
             //_totalFee = _totalFee - _use2Fee;
-            _updateTaxFee(_use2Fee, 0);
-            _use2Fee = use2Fee;
-            _updateTaxFee(_use2Fee, 1);
+            _updateTaxFee(_stakingFee, 0);
+            _stakingFee = stakingFee;
+            _updateTaxFee(_stakingFee, 1);
             //_taxFee = _taxFee + _use2Fee;
             //_totalFee = _totalFee + _use2Fee;
         }
