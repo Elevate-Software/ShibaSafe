@@ -777,11 +777,7 @@ pragma solidity ^0.6.12;
 
         address payable public _devWalletAddress;
         address payable public _marketingWalletAddress;
-        address payable public _buyMarketingWalletAddress;
-        address payable public _buyGhostWalletAddress;
-
         address payable public _useCaseWalletAddress;
-        address payable public _buyUseCaseWalletAddress;
         address payable public _stakingWalletAddress;
         address payable public _ghostWalletAddress;
 
@@ -996,13 +992,6 @@ pragma solidity ^0.6.12;
             _buyUseFee = 0;
         }
 
-        function removeAllBuyFee() private {
-        if(_buyTaxFee == 0 && _buyTeamFee == 0 && _buyTotalFee == 0) return;
-            //if (_totalFee == 0) return; 
-
-
-        }
-
         function restoreAllFee() private {
             _taxFee = _previousTaxFee;
             _teamFee = _previousTeamFee;
@@ -1100,9 +1089,9 @@ pragma solidity ^0.6.12;
         function sendETHToTeam(uint256 amount) private {
             //Verify this is legal - if sender is not uniswap router then its a buy
             if(sender != address(uniswapV2Router)){
-                _buyMarketingWalletAddress.transfer(amount.mul(_buyMarketingFee/_buyTotalFee));
-                _buyUseCaseWalletAddress.transfer(amount.mul(_buyUseFee/_buyTotalFee));
-                _buyGhostWalletAddress.transfer(amount.mul(_buyGhostFee/_buyTotalFee));
+                _marketingWalletAddress.transfer(amount.mul(_buyMarketingFee/_buyTotalFee));
+                _useCaseWalletAddress.transfer(amount.mul(_buyUseFee/_buyTotalFee));
+                _ghostWalletAddress.transfer(amount.mul(_buyGhostFee/_buyTotalFee));
             }else if(sender == address(uniswapV2Router)){
                 _marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
                 _useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
