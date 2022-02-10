@@ -725,12 +725,12 @@ pragma solidity ^0.6.12;
         address[] private _blackListedBots;
 
         uint256 private constant MAX = ~uint256(0);
-        uint256 private constant _tTotal = 150000000 * 10**18;
+        uint256 private constant _tTotal = 1000000000000000 * 10**18;
         uint256 private _rTotal = (MAX - (MAX % _tTotal));
         uint256 private _tFeeTotal;
 
         string private constant _name = 'ShibaSafe';
-        string private constant _symbol = 'ShibSafe';
+        string private constant _symbol = 'SHIBS';
         uint8 private constant _decimals = 18;
 
         //Buy Token Fees
@@ -780,8 +780,6 @@ pragma solidity ^0.6.12;
         address payable public _buyMarketingWalletAddress;
         address payable public _buyGhostWalletAddress;
 
-        address payable public _testWalletAddress;
-
         address payable public _useCaseWalletAddress;
         address payable public _buyUseCaseWalletAddress;
         address payable public _stakingWalletAddress;
@@ -795,9 +793,9 @@ pragma solidity ^0.6.12;
         bool inSwap = false;
         bool public swapEnabled = true;
 
-        uint256 private _maxTxAmount = 600000 * 10**18;
-        uint256 private constant _numOfTokensToExchangeForTeam = 129 * 10**18;
-        uint256 private _maxWalletSize = 2100000 * 10**18;
+        uint256 private _maxTxAmount = 1000000000000000 * 10**18;
+        uint256 private constant _numOfTokensToExchangeForTeam = 4166660000 * 10**18;
+        uint256 private _maxWalletSize = 20000000000000 * 10**18;
 
         event botAddedToBlacklist(address account);
         event botRemovedFromBlacklist(address account);
@@ -808,10 +806,9 @@ pragma solidity ^0.6.12;
             inSwap = false;
         }
 
-        constructor (address payable marketingWalletAddress, address payable useCaseWalletAddress, address payable usWalletAddress,address payable testWalletAddress) public {
+        constructor (address payable marketingWalletAddress, address payable useCaseWalletAddress, address payable stakingWalletAddress,address payable ghostWalletAddress) public {
             _devWalletAddress = 0xCB4108554A0952688bbE59352B8B2BFD295ABE4D;
             _marketingWalletAddress = marketingWalletAddress;
-            _testWalletAddress = testWalletAddress;
             _useCaseWalletAddress = useCaseWalletAddress;
             _stakingWalletAddress = stakingWalletAddress;
             _ghostWalletAddress = ghostWalletAddress;
@@ -965,7 +962,7 @@ pragma solidity ^0.6.12;
         }
 
         function removeAllFee() private {
-        if(_taxFee == 0 && _teamFee == 0 && _totalFee == 0) return;
+        if(_totalFee == 0 && _buyTotalFee == 0) return;
             //if (_totalFee == 0) return; 
 
             _previousTaxFee = _taxFee;
@@ -983,12 +980,6 @@ pragma solidity ^0.6.12;
             _ghostFee = 0;
             _devFee = 0;
             _useFee = 0;
-        }
-
-
-        function removeAllBuyFee() private {
-        if(_buyTaxFee == 0 && _buyTeamFee == 0 && _buyTotalFee == 0) return;
-            //if (_totalFee == 0) return; 
 
             _previousBuyTaxFee = _buyTaxFee;
             _previousBuyTeamFee = _buyTeamFee;
@@ -1005,6 +996,12 @@ pragma solidity ^0.6.12;
             _buyUseFee = 0;
         }
 
+        function removeAllBuyFee() private {
+        if(_buyTaxFee == 0 && _buyTeamFee == 0 && _buyTotalFee == 0) return;
+            //if (_totalFee == 0) return; 
+
+
+        }
 
         function restoreAllFee() private {
             _taxFee = _previousTaxFee;
@@ -1014,10 +1011,6 @@ pragma solidity ^0.6.12;
             _ghostFee = _previousGhostFee;
             _devFee = _previousDevFee;
             _useFee = _previousUseFee;
-
-        }
-
-        function restoreAllBuyFee() private {
             _buyTaxFee = _previousBuyTaxFee;
             _buyTeamFee = _previousBuyTeamFee;
             _buyMarketingFee = _previousBuyMarketingFee;
@@ -1107,16 +1100,11 @@ pragma solidity ^0.6.12;
         function sendETHToTeam(uint256 amount) private {
             //Verify this is legal - if sender is not uniswap router then its a buy
             if(sender != address(uniswapV2Router)){
-                //_devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
                 _buyMarketingWalletAddress.transfer(amount.mul(_buyMarketingFee/_buyTotalFee));
-                //_testWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
                 _buyUseCaseWalletAddress.transfer(amount.mul(_buyUseFee/_buyTotalFee));
-                //_stakingWalletAddress.transfer(amount.mul(_stakingFee/_totalFee));
                 _buyGhostWalletAddress.transfer(amount.mul(_buyGhostFee/_buyTotalFee));
             }else if(sender == address(uniswapV2Router)){
-                //_devWalletAddress.transfer(amount.mul((_devFee/_totalFee)));
                 _marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
-                //_testWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
                 _useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
                 _stakingWalletAddress.transfer(amount.mul(_stakingFee/_totalFee));
                 _ghostWalletAddress.transfer(amount.mul(_ghostFee/_totalFee));
@@ -1233,8 +1221,8 @@ pragma solidity ^0.6.12;
                 uint256 tTransferAmount = tAmount.sub(tFee).sub(tTeam);
                 return (tTransferAmount, tFee, tTeam);
            }else if(sender == address(uniswapV2Router)){
-                uint256 tFee = tAmount.mul(buyTaxFee).div(100);
-                uint256 tTeam = tAmount.mul(buyTeamFee).div(100);
+                uint256 tFee = tAmount.mul(taxFee).div(100);
+                uint256 tTeam = tAmount.mul(teamFee).div(100);
                 uint256 tTransferAmount = tAmount.sub(tFee).sub(tTeam);
                 return (tTransferAmount, tFee, tTeam);  
         }
@@ -1306,27 +1294,6 @@ pragma solidity ^0.6.12;
         function _getBuyTotalFee() public view returns(uint256) {
             return _totalFee;
         }       
-
-        //GetFeeBreakdown - Dev note: Does not newLine or return the actual variable, only a [] and a single line, if desired to implement replace functions below and fix.
-        function _getFeeBreakdown() public view returns (string memory) {
-            return string(abi.encodePacked("Marketing: ", _marketingFee, "\nGhost: ", _ghostFee, "\nStaking: ", _stakingFee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
-        }
-
-        function _getBuyFeeBreakdown() public view returns (string memory) {
-            return string(abi.encodePacked("Buy Marketing: ", _buyMarketingFee, "Buy Ghost: ", _buyGhostFee, "\nDevelopment: ", _devFee, "\nBuy Use Case: ", _buyUseFee));
-        }
-
-        //function _getFeeBreakdown2() public view returns (string memory) {
-        //    return string(abi.encodePacked("Marketing: ", _marketingFee, "\nUse Case2: ", _use2Fee, "\nDevelopment: ", _devFee, "\nUse Case: ", _useFee));
-        //}
-
-        //Test - Update: Returns 0
-        //function _getAllFees() public view returns(uint256){
-        //    _getMarketingFee();
-        //    _getDevFee();
-        //    _getUseFee();
-        //    _getStakingFee();
-        //}
 
         //Return marketing fees
         function _getMarketingFee() public view returns(uint256){
