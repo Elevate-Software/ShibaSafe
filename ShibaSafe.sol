@@ -755,11 +755,6 @@ pragma solidity ^0.6.12;
         uint256 private _totalFee = (_marketingFee + _stakingFee + _devFee + _useFee + _ghostFee);
 
         uint256 private _devFee = 0;
-        //In case we need an adittional wallet for staking or NFTs
-
-
-
-
 
         //Store  prior fees for restoreAllFee
         uint256 private _previousTaxFee = _taxFee;
