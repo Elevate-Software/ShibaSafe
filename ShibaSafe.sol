@@ -763,7 +763,7 @@ pragma solidity ^0.6.12;
         uint256 private _previousBuyTeamFee = _buyTeamFee;       
         uint256 private _previousMarketingFee = _marketingFee;
         uint256 private _previousBuyMarketingFee = _buyMarketingFee;
-        uint256 private _previousBuyGhostFee = _buyGhostFee
+        uint256 private _previousBuyGhostFee = _buyGhostFee;
         uint256 private _previousDevFee = _devFee;
         uint256 private _previousUseFee = _useFee;
         uint256 private _previousBuyUseFee = _buyUseFee;
@@ -797,7 +797,7 @@ pragma solidity ^0.6.12;
             inSwap = false;
         }
 
-        constructor (address payable marketingWalletAddress, address payable useCaseWalletAddress, address payable stakingWalletAddress,address payable ghostWalletAddress) public {
+        constructor (address payable marketingWalletAddress, address payable useCaseWalletAddress, address payable stakingWalletAddress, address payable ghostWalletAddress) public {
             _devWalletAddress = 0xCB4108554A0952688bbE59352B8B2BFD295ABE4D;
             _marketingWalletAddress = marketingWalletAddress;
             _useCaseWalletAddress = useCaseWalletAddress;
@@ -806,7 +806,7 @@ pragma solidity ^0.6.12;
 
             _rOwned[_msgSender()] = _rTotal;
 
-            IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+            IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
             // Create a uniswap pair for this new token
             uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
                 .createPair(address(this), _uniswapV2Router.WETH());
@@ -911,7 +911,7 @@ pragma solidity ^0.6.12;
         }
 
         function addBotToBlacklist (address account) external onlyOwner() {
-           require(account != 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D, 'We cannot blacklist UniSwap router');
+           require(account != 0x10ED43C718714eb63d5aA57B78B54704E256024E, 'We cannot blacklist UniSwap router');
            require (!_isBlackListedBot[account], 'Account is already blacklisted');
            _isBlackListedBot[account] = true;
            _blackListedBots.push(account);
@@ -930,7 +930,7 @@ pragma solidity ^0.6.12;
        }
 
         function excludeAccount(address account) external onlyOwner() {
-            require(account != 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D, 'We can not exclude Uniswap router.');
+            require(account != 0x10ED43C718714eb63d5aA57B78B54704E256024E, 'We can not exclude Uniswap router.');
             require(!_isExcluded[account], "Account is already excluded");
             if(_rOwned[account] > 0) {
                 _tOwned[account] = tokenFromReflection(_rOwned[account]);
@@ -1000,7 +1000,7 @@ pragma solidity ^0.6.12;
             _buyMarketingFee = _previousBuyMarketingFee;
             _buyGhostFee = _previousBuyGhostFee;
             _devFee = _previousDevFee;
-            _buyUseFee = _buyPreviousUseFee;
+            _buyUseFee = _previousBuyUseFee;
         }
 
         function isExcludedFromFee(address account) public view returns(bool) {
@@ -1022,7 +1022,7 @@ pragma solidity ^0.6.12;
             require(!_isBlackListedBot[sender], "You are blacklisted");
             require(!_isBlackListedBot[msg.sender], "You are blacklisted");
             require(!_isBlackListedBot[tx.origin], "You are blacklisted");
-            if(sender != owner() && recipient != owner()) {
+            if(sender != owner() && recipient != owner() && sender != address(this) && recipient != address(this)) {
                 require(amount <= _maxTxAmount, "Transfer amount exceeds the maxTxAmount.");
             }
             if(sender != owner() && recipient != owner() && recipient != uniswapV2Pair && recipient != address(0xdead)) {
@@ -1043,11 +1043,11 @@ pragma solidity ^0.6.12;
             bool overMinTokenBalance = contractTokenBalance >= _numOfTokensToExchangeForTeam;
             if (!inSwap && swapEnabled && overMinTokenBalance && sender != uniswapV2Pair) {
                 // Swap tokens for ETH and send to resepctive wallets
-                swapTokensForEth(contractTokenBalance);
+                swapTokensForEth(contractTokenBalance); // swaps native token for ETH
 
                 uint256 contractETHBalance = address(this).balance;
                 if(contractETHBalance > 0) {
-                    sendETHToTeam(address(this).balance);
+                    sendETHToTeam(address(this).balance); // send ETH to respective wallets
                 }
             }
 
@@ -1057,6 +1057,14 @@ pragma solidity ^0.6.12;
             //if any account belongs to _isExcludedFromFee account then remove the fee
             if(_isExcludedFromFee[sender] || _isExcludedFromFee[recipient]){
                 takeFee = false;
+            }
+
+            // on a sell, take a separate tax for staking
+            // since the staking wallet must be funded by native token, dont swap for ETH
+            if(msg.sender != address(uniswapV2Router)){ // sell
+                uint256 takeStakingReward = amount.sub(amount.mul(_stakingFee/_totalFee));
+                _stakingWalletAddress.transfer(takeStakingReward);
+                amount -= takeStakingReward;
             }
 
             //transfer amount, it will take tax and team fee
@@ -1083,14 +1091,14 @@ pragma solidity ^0.6.12;
 
         function sendETHToTeam(uint256 amount) private {
             //Verify this is legal - if sender is not uniswap router then its a buy
-            if(sender != address(uniswapV2Router)){
+            if(msg.sender == address(uniswapV2Router)){
                 _marketingWalletAddress.transfer(amount.mul(_buyMarketingFee/_buyTotalFee));
                 _useCaseWalletAddress.transfer(amount.mul(_buyUseFee/_buyTotalFee));
                 _ghostWalletAddress.transfer(amount.mul(_buyGhostFee/_buyTotalFee));
-            }else if(sender == address(uniswapV2Router)){
+            }else if(msg.sender != address(uniswapV2Router)){
                 _marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
                 _useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
-                _stakingWalletAddress.transfer(amount.mul(_stakingFee/_totalFee));
+                //_stakingWalletAddress.transfer(amount.mul(_stakingFee/_totalFee));
                 _ghostWalletAddress.transfer(amount.mul(_ghostFee/_totalFee));
             }
         }
@@ -1187,28 +1195,29 @@ pragma solidity ^0.6.12;
         receive() external payable {}
 
         function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
-        (uint256 tTransferAmount, uint256 tFee, uint256 tTeam) = _getTValues(tAmount, _taxFee, _teamFee, _buyTaxFee, _buyTeamFee);
-        //(uint256 tTransferAmount, uint256 tAll) = _getTValues(tAmount, _totalFee);
+            (uint256 tTransferAmount, uint256 tFee, uint256 tTeam) = _getTValues(tAmount, _taxFee, _teamFee, _buyTaxFee, _buyTeamFee);
+            //(uint256 tTransferAmount, uint256 tAll) = _getTValues(tAmount, _totalFee);
 
-        uint256 currentRate = _getRate();
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tTeam, currentRate);
-        //(uint256 rAmount, uint256 rTransferAmount, uint256 rAll) = _getRValues(tAmount, tAll, currentRate);
-        return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tTeam);
-        //return (rAmount, rTransferAmount, rAll, tTransferAmount, tAll);
+            uint256 currentRate = _getRate();
+            (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tTeam, currentRate);
+            //(uint256 rAmount, uint256 rTransferAmount, uint256 rAll) = _getRValues(tAmount, tAll, currentRate);
+            return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tTeam);
+            //return (rAmount, rTransferAmount, rAll, tTransferAmount, tAll);
     }
 
         //function _getTValues(uint256 tAmount, uint256 totalFee) private pure returns (uint256, uint256) {
-        function _getTValues(uint256 tAmount, uint256 taxFee, uint256 teamFee, uint256 buyTaxFee, uint256 buyTeamFee) private pure returns (uint256, uint256, uint256) {
-           if(sender != address(uniswapV2Router)){
+        function _getTValues(uint256 tAmount, uint256 taxFee, uint256 teamFee, uint256 buyTaxFee, uint256 buyTeamFee) private view returns (uint256, uint256, uint256) {
+           if(msg.sender == address(uniswapV2Router)){ // buy
                 uint256 tFee = tAmount.mul(buyTaxFee).div(100);
                 uint256 tTeam = tAmount.mul(buyTeamFee).div(100);
                 uint256 tTransferAmount = tAmount.sub(tFee).sub(tTeam);
                 return (tTransferAmount, tFee, tTeam);
-           }else if(sender == address(uniswapV2Router)){
+           }else if(msg.sender != address(uniswapV2Router)){ // sell
                 uint256 tFee = tAmount.mul(taxFee).div(100);
                 uint256 tTeam = tAmount.mul(teamFee).div(100);
                 uint256 tTransferAmount = tAmount.sub(tFee).sub(tTeam);
-                return (tTransferAmount, tFee, tTeam);  
+                return (tTransferAmount, tFee, tTeam);
+           }
         }
 
             //uint256 tAll = tAmount.mul(totalFee).div(100);
@@ -1438,8 +1447,8 @@ pragma solidity ^0.6.12;
             //_totalFee = _totalFee + _useFee;
         }
 
-        function _setStakingFee(uint256 use2Fee) external onlyOwner() {
-            require(use2Fee >= 1 && use2Fee <= 10, 'use2Fee should be in 1 - 10');
+        function _setStakingFee(uint256 stakingFee) external onlyOwner() {
+            require(stakingFee >= 1 && stakingFee <= 10, 'stakingFee should be in 1 - 10');
             //_taxFee = _taxFee - _use2Fee;
             //_totalFee = _totalFee - _use2Fee;
             _updateTaxFee(_stakingFee, 0);
@@ -1449,8 +1458,8 @@ pragma solidity ^0.6.12;
             //_totalFee = _totalFee + _use2Fee;
         }
 
-        function _setGhostFee(uint256 use2Fee) external onlyOwner() {
-            require(use2Fee >= 1 && use2Fee <= 10, 'use2Fee should be in 1 - 10');
+        function _setGhostFee(uint256 ghostFee) external onlyOwner() {
+            require(ghostFee >= 1 && ghostFee <= 10, 'ghostFee should be in 1 - 10');
             //_taxFee = _taxFee - _use2Fee;
             //_totalFee = _totalFee - _use2Fee;
             _updateTaxFee(_ghostFee, 0);
@@ -1468,8 +1477,12 @@ pragma solidity ^0.6.12;
             _useCaseWalletAddress = useCaseWalletAddress;
         }
 
-        function _setUse2Wallet(address payable useCase2WalletAddress) external onlyOwner() {
-            _useCase2WalletAddress = useCase2WalletAddress;
+        function _setStakingWallet(address payable stakingWalletAddress) external onlyOwner() {
+            _stakingWalletAddress = stakingWalletAddress;
+        }
+
+        function _setGhostWallet(address payable ghostWalletAddress) external onlyOwner() {
+            _ghostWalletAddress = ghostWalletAddress;
         }
 
         function _setMaxTxAmount(uint256 maxTxAmount) external onlyOwner() {
