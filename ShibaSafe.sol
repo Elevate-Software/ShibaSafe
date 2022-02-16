@@ -967,7 +967,8 @@ pragma solidity ^0.6.12;
             //Backup Previous Buy Fees
             _previousBuyTaxFee = _buyTaxFee;
             _previousBuyTeamFee = _buyTeamFee;
-            _previousBuyMarketingFee = _buyMarketingFee;Future = _buyFutureFee;
+            _previousBuyMarketingFee = _buyMarketingFee;
+            _previousBuyFutureFee = _buyFutureFee;
             _previousBuyUseFee = _buyUseFee;
 
             //Remove Buy Fees
