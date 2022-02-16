@@ -31,7 +31,7 @@ pragma solidity ^0.6.12;
         ) external view returns (uint256);
 
         /**
-        * @dev Moves `amount` tokens from the caller's account to `recipient`.
+        * @dev Moves `amount` tokens from the caller"s account to `recipient`.
         *
         * Returns a boolean value indicating whether the operation succeeded.
         *
@@ -55,14 +55,14 @@ pragma solidity ^0.6.12;
         ) external view returns (uint256);
 
         /**
-        * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+        * @dev Sets `amount` as the allowance of `spender` over the caller"s tokens.
         *
         * Returns a boolean value indicating whether the operation succeeded.
         *
         * IMPORTANT: Beware that changing an allowance with this method brings the risk
         * that someone may use both the old and the new allowance by unfortunate
         * transaction ordering. One possible solution to mitigate this race
-        * condition is to first reduce the spender's allowance to 0 and set the
+        * condition is to first reduce the spender"s allowance to 0 and set the
         * desired value afterwards:
         * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
         *
@@ -75,7 +75,7 @@ pragma solidity ^0.6.12;
 
         /**
         * @dev Moves `amount` tokens from `sender` to `recipient` using the
-        * allowance mechanism. `amount` is then deducted from the caller's
+        * allowance mechanism. `amount` is then deducted from the caller"s
         * allowance.
         *
         * Returns a boolean value indicating whether the operation succeeded.
@@ -108,7 +108,7 @@ pragma solidity ^0.6.12;
         * @dev Returns the addition of two unsigned integers, reverting on
         * overflow.
         *
-        * Counterpart to Solidity's `+` operator.
+        * Counterpart to Solidity"s `+` operator.
         *
         * Requirements:
         *
@@ -125,7 +125,7 @@ pragma solidity ^0.6.12;
         * @dev Returns the subtraction of two unsigned integers, reverting on
         * overflow (when the result is negative).
         *
-        * Counterpart to Solidity's `-` operator.
+        * Counterpart to Solidity"s `-` operator.
         *
         * Requirements:
         *
@@ -139,7 +139,7 @@ pragma solidity ^0.6.12;
         * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
         * overflow (when the result is negative).
         *
-        * Counterpart to Solidity's `-` operator.
+        * Counterpart to Solidity"s `-` operator.
         *
         * Requirements:
         *
@@ -156,15 +156,15 @@ pragma solidity ^0.6.12;
         * @dev Returns the multiplication of two unsigned integers, reverting on
         * overflow.
         *
-        * Counterpart to Solidity's `*` operator.
+        * Counterpart to Solidity"s `*` operator.
         *
         * Requirements:
         *
         * - Multiplication cannot overflow.
         */
         function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-            // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-            // benefit is lost if 'b' is also tested.
+            // Gas optimization: this is cheaper than requiring "a" not being zero, but the
+            // benefit is lost if "b" is also tested.
             // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
             if (a == 0) {
                 return 0;
@@ -180,7 +180,7 @@ pragma solidity ^0.6.12;
         * @dev Returns the integer division of two unsigned integers. Reverts on
         * division by zero. The result is rounded towards zero.
         *
-        * Counterpart to Solidity's `/` operator. Note: this function uses a
+        * Counterpart to Solidity"s `/` operator. Note: this function uses a
         * `revert` opcode (which leaves remaining gas untouched) while Solidity
         * uses an invalid opcode to revert (consuming all remaining gas).
         *
@@ -196,7 +196,7 @@ pragma solidity ^0.6.12;
         * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
         * division by zero. The result is rounded towards zero.
         *
-        * Counterpart to Solidity's `/` operator. Note: this function uses a
+        * Counterpart to Solidity"s `/` operator. Note: this function uses a
         * `revert` opcode (which leaves remaining gas untouched) while Solidity
         * uses an invalid opcode to revert (consuming all remaining gas).
         *
@@ -207,7 +207,7 @@ pragma solidity ^0.6.12;
         function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
             require(b > 0, errorMessage);
             uint256 c = a / b;
-            // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+            // assert(a == b * c + a % b); // There is no case in which this doesn"t hold
 
             return c;
         }
@@ -216,7 +216,7 @@ pragma solidity ^0.6.12;
         * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
         * Reverts when dividing by zero.
         *
-        * Counterpart to Solidity's `%` operator. This function uses a `revert`
+        * Counterpart to Solidity"s `%` operator. This function uses a `revert`
         * opcode (which leaves remaining gas untouched) while Solidity uses an
         * invalid opcode to revert (consuming all remaining gas).
         *
@@ -232,7 +232,7 @@ pragma solidity ^0.6.12;
         * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
         * Reverts with custom message when dividing by zero.
         *
-        * Counterpart to Solidity's `%` operator. This function uses a `revert`
+        * Counterpart to Solidity"s `%` operator. This function uses a `revert`
         * opcode (which leaves remaining gas untouched) while Solidity uses an
         * invalid opcode to revert (consuming all remaining gas).
         *
@@ -267,7 +267,7 @@ pragma solidity ^0.6.12;
         function isContract(address account) internal view returns (bool) {
             // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
             // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
-            // for accounts without code, i.e. `keccak256('')`
+            // for accounts without code, i.e. `keccak256("")`
             bytes32 codehash;
             bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
             // solhint-disable-next-line no-inline-assembly
@@ -276,7 +276,7 @@ pragma solidity ^0.6.12;
         }
 
         /**
-        * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
+        * @dev Replacement for Solidity"s `transfer`: sends `amount` wei to
         * `recipient`, forwarding all available gas and reverting on errors.
         *
         * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
@@ -727,8 +727,8 @@ pragma solidity ^0.6.12;
         uint256 private _rTotal = (MAX - (MAX % _tTotal));
         uint256 private _tFeeTotal;
 
-        string private constant _name = 'ShibaSafe';
-        string private constant _symbol = 'SHIBS';
+        string private constant _name = "ShibaSafe";
+        string private constant _symbol = "SHIBS";
         uint8 private constant _decimals = 18;
 
         //Buy Token Fees
@@ -905,14 +905,14 @@ pragma solidity ^0.6.12;
         }
 
         function addBotToBlacklist (address account) external onlyOwner() {
-           require(account != 0x10ED43C718714eb63d5aA57B78B54704E256024E, 'We cannot blacklist UniSwap router');
-           require (!_isBlackListedBot[account], 'Account is already blacklisted');
+           require(account != 0x10ED43C718714eb63d5aA57B78B54704E256024E, "We cannot blacklist UniSwap router");
+           require (!_isBlackListedBot[account], "Account is already blacklisted");
            _isBlackListedBot[account] = true;
            _blackListedBots.push(account);
         }
 
         function removeBotFromBlacklist(address account) external onlyOwner() {
-          require (_isBlackListedBot[account], 'Account is not blacklisted');
+          require (_isBlackListedBot[account], "Account is not blacklisted");
           for (uint256 i = 0; i < _blackListedBots.length; i++) {
                  if (_blackListedBots[i] == account) {
                      _blackListedBots[i] = _blackListedBots[_blackListedBots.length - 1];
@@ -924,7 +924,7 @@ pragma solidity ^0.6.12;
        }
 
         function excludeAccount(address account) external onlyOwner() {
-            require(account != 0x10ED43C718714eb63d5aA57B78B54704E256024E, 'We can not exclude Uniswap router.');
+            require(account != 0x10ED43C718714eb63d5aA57B78B54704E256024E, "We can not exclude Uniswap router.");
             require(!_isExcluded[account], "Account is already excluded");
             if(_rOwned[account] > 0) {
                 _tOwned[account] = tokenFromReflection(_rOwned[account]);
@@ -1026,8 +1026,8 @@ pragma solidity ^0.6.12;
             }
             // is the token balance of this contract address over the min number of
             // tokens that we need to initiate a swap?
-            // also, don't get caught in a circular team event.
-            // also, don't swap if sender is uniswap pair.
+            // also, don"t get caught in a circular team event.
+            // also, don"t swap if sender is uniswap pair.
             uint256 contractTokenBalance = balanceOf(address(this));
 
             if(contractTokenBalance >= _maxTxAmount)
@@ -1334,7 +1334,7 @@ pragma solidity ^0.6.12;
 
         //Setters for taxes
         function _setMarketingFee(uint256 marketingFee) external onlyOwner() {
-            require(marketingFee >= 1 && marketingFee <= 10, 'marketingFee should be in 1 - 10');
+            require(marketingFee >= 1 && marketingFee <= 10, "marketingFee should be in 1 - 10");
             //Need to update team and total fees
             _updateTeamFee(_marketingFee, 0);
             _marketingFee = marketingFee;
@@ -1342,14 +1342,14 @@ pragma solidity ^0.6.12;
         }
 
         function _setBuyMarketingFee(uint256 buyMarketingFee) external onlyOwner() {
-            require(buyMarketingFee >= 1 && buyMarketingFee <= 10, 'buyMarketingFee should be in 1 - 10');
+            require(buyMarketingFee >= 1 && buyMarketingFee <= 10, "buyMarketingFee should be in 1 - 10");
             _updateBuyTeamFee(_buyMarketingFee, 0);
             _buyMarketingFee = buyMarketingFee;
             _updateBuyTeamFee(_buyMarketingFee, 1);
         }
 
         function _setBuyFutureFee(uint256 buyFutureFee) external onlyOwner() {
-            require(buyFutureFee >= 1 && buyFutureFee <= 10, 'buyFutureFee should be in 1 - 10');
+            require(buyFutureFee >= 1 && buyFutureFee <= 10, "buyFutureFee should be in 1 - 10");
             _updateBuyTeamFee(_buyFutureFee, 0);
             _buyFutureFee = buyFutureFee;
             _updateBuyTeamFee(_buyFutureFee, 1);
@@ -1357,7 +1357,7 @@ pragma solidity ^0.6.12;
 
         function _setUseFee(uint256 useFee) external onlyOwner() {
             //Need to update tax and total fees
-            require(useFee >= 1 && useFee <= 10, 'useFee should be in 1 - 10');
+            require(useFee >= 1 && useFee <= 10, "useFee should be in 1 - 10");
             _updateTaxFee(_useFee, 0);
             _useFee = useFee;
             _updateTaxFee(_useFee, 1);
@@ -1365,21 +1365,21 @@ pragma solidity ^0.6.12;
 
         function _setBuyUseFee(uint256 buyUseFee) external onlyOwner() {
             //Need to update tax and total fees
-            require(buyUseFee >= 1 && buyUseFee <= 10, 'buyUseFee should be in 1 - 10');
+            require(buyUseFee >= 1 && buyUseFee <= 10, "buyUseFee should be in 1 - 10");
             _updateBuyTaxFee(_buyUseFee, 0);
             _buyUseFee = buyUseFee;
             _updateBuyTaxFee(_buyUseFee, 1);
         }
 
         function _setStakingFee(uint256 stakingFee) external onlyOwner() {
-            require(stakingFee >= 1 && stakingFee <= 10, 'stakingFee should be in 1 - 10');
+            require(stakingFee >= 1 && stakingFee <= 10, "stakingFee should be in 1 - 10");
             _updateTaxFee(_stakingFee, 0);
             _stakingFee = stakingFee;
             _updateTaxFee(_stakingFee, 1);
         }
 
         function _setFutureFee(uint256 futureFee) external onlyOwner() {
-            require(futureFee >= 1 && futureFee <= 10, 'futureFee should be in 1 - 10');
+            require(futureFee >= 1 && futureFee <= 10, "futureFee should be in 1 - 10");
             _updateTaxFee(_futureFee, 0);
             _futureFee = futureFee;
             _updateTaxFee(_futureFee, 1);
