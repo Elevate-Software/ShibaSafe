@@ -993,7 +993,7 @@ pragma solidity ^0.6.12;
             _buyTaxFee = _previousBuyTaxFee;
             _buyTeamFee = _previousBuyTeamFee;
             _buyMarketingFee = _previousBuyMarketingFee;
-            _buyFutureFeFuture;
+            _buyFutureFee = _previousBuyFutureFee;
             _buyUseFee = _previousBuyUseFee;
         }
 
