@@ -946,6 +946,7 @@ pragma solidity ^0.6.12;
             }
         }
 
+        //Remove all fees
         function removeAllFee() private {
         if(_totalFee == 0 && _buyTotalFee == 0) return;
             //Backup Previous Sell Fees
