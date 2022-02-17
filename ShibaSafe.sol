@@ -432,10 +432,6 @@ pragma solidity ^0.6.12;
             _owner = newOwner;
         }
 
-        //function getUnlockTime() public view returns (uint256) {
-        //    return _lockTime;
-        //}
-
     }
 
     interface IUniswapV2Factory {
@@ -1056,7 +1052,6 @@ pragma solidity ^0.6.12;
                 takeFee = false;
             }
 
-            // on a sell, take a separate tax for staking
             // since the staking wallet must be funded by native token, dont swap for ETH
             if(msg.sender != address(uniswapV2Router)){ // sell
                 //uint256 takeStakingReward = amount.sub(amount.mul(_stakingFee/_totalFee));
@@ -1292,7 +1287,6 @@ pragma solidity ^0.6.12;
         }
 
         //updateTeam
-        //_AdOrSub == 0, subtract, == 1, add
         function _updateTeamFee(uint256 _feeName,uint256 _AddOrSub) private {
             if (_AddOrSub == 0)  {
                 _teamFee = _teamFee - _feeName;
@@ -1313,8 +1307,6 @@ pragma solidity ^0.6.12;
             }
         }
 
-        //Update tax
-        //_AdOrSub == 0, subtract, == 1, add
         function _updateTaxFee(uint256 _feeName,uint256 _AddOrSub) private {
             if (_AddOrSub == 0)  {
                 _taxFee = _taxFee - _feeName;
