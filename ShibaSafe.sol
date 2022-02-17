@@ -1194,7 +1194,7 @@ pragma solidity ^0.6.12;
                 uint256 tTeam = tAmount.mul(buyTeamFee).div(100);
                 uint256 tTransferAmount = tAmount.sub(tFee).sub(tTeam);
                 return (tTransferAmount, tFee, tTeam);
-           }else if(msg.sender != address(uniswapV2Router)){ // sell
+           } else { // sell or send
                 uint256 tFee = tAmount.mul(taxFee).div(100);
                 uint256 tTeam = tAmount.mul(teamFee).div(100);
                 uint256 tTransferAmount = tAmount.sub(tFee).sub(tTeam);
