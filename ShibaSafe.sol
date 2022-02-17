@@ -777,7 +777,8 @@ pragma solidity ^0.6.12;
         address public immutable uniswapV2Pair;
 
         bool inSwap = false;
-        bool public swapEnabled = true;
+        bool public swapEnabled = false;
+        bool public tradingActive = false;
 
         uint256 private _maxTxAmount = 1000000000000000 * 10**18;
         uint256 private constant _numOfTokensToExchangeForTeam = 4166660000 * 10**18;
@@ -1017,6 +1018,7 @@ pragma solidity ^0.6.12;
             require(!_isBlackListedBot[sender], "You are blacklisted");
             require(!_isBlackListedBot[msg.sender], "You are blacklisted");
             require(!_isBlackListedBot[tx.origin], "You are blacklisted");
+            require(tradingActive || (_isExcludedFromFee[sender] || _isExcludedFromFee[recipient]), "Trading is currently not active");
             if(sender != owner() && recipient != owner() && sender != address(this) && recipient != address(this)) {
                 require(amount <= _maxTxAmount, "Transfer amount exceeds the maxTxAmount.");
             }
@@ -1057,9 +1059,10 @@ pragma solidity ^0.6.12;
             // on a sell, take a separate tax for staking
             // since the staking wallet must be funded by native token, dont swap for ETH
             if(msg.sender != address(uniswapV2Router)){ // sell
-                uint256 takeStakingReward = amount.sub(amount.mul(_stakingFee/_totalFee));
+                //uint256 takeStakingReward = amount.sub(amount.mul(_stakingFee/_totalFee));
+                uint256 takeStakingReward = amount.div(100).mul(_stakingFee);
                 _stakingWalletAddress.transfer(takeStakingReward);
-                amount -= takeStakingReward;
+                amount = amount.sub(takeStakingReward);
             }
 
             //transfer amount, it will take tax and team fee
@@ -1087,14 +1090,20 @@ pragma solidity ^0.6.12;
         function sendETHToTeam(uint256 amount) private {
             if(msg.sender == address(uniswapV2Router)){
                 //Buy Fees
-                _marketingWalletAddress.transfer(amount.mul(_buyMarketingFee/_buyTotalFee));
-                _useCaseWalletAddress.transfer(amount.mul(_buyUseFee/_buyTotalFee));
-                _futureFeeWalletAddress.transfer(amount.mul(_buyFutureFee/_buyTotalFee));
+                //_marketingWalletAddress.transfer(amount.mul(_buyMarketingFee/_buyTotalFee));
+                _marketingWalletAddress.transfer(amount.div(_buyTotalFee).mul(_buyMarketingFee)); //(amount/12)*6 = 6%
+                //_useCaseWalletAddress.transfer(amount.mul(_buyUseFee/_buyTotalFee));
+                _useCaseWalletAddress.transfer(amount.div(_buyTotalFee).mul(_buyUseFee));
+                //_futureFeeWalletAddress.transfer(amount.mul(_buyFutureFee/_buyTotalFee));
+                _futureFeeWalletAddress.transfer(amount.div(_buyTotalFee).mul(_buyFutureFee));
             }else if(msg.sender != address(uniswapV2Router)){
                 //Sell Fees
-                _marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
-                _useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
-                _futureFeeWalletAddress.transfer(amount.mul(_futureFee/_totalFee));
+                //_marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
+                _marketingWalletAddress.transfer(amount.div(_totalFee).mul(_marketingFee));
+                //_useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
+                _useCaseWalletAddress.transfer(amount.div(_totalFee).mul(_useFee));
+                //_futureFeeWalletAddress.transfer(amount.mul(_futureFee/_totalFee));
+                _futureFeeWalletAddress.transfer(amount.div(_totalFee).mul(_futureFee));
             }
         }
 
@@ -1402,14 +1411,26 @@ pragma solidity ^0.6.12;
         }
 
         function _setMaxTxAmount(uint256 maxTxAmount) external onlyOwner() {
-            uint256 minTxAmount = 100000000000 * 10**18; // 0.001% of supply
-            require(maxTxAmount > minTxAmount, "maxTxAmount should be greater than 0.001% of supply");
+            uint256 minTxAmount = 5000000000000 * 10**18; // 0.005 = .5% of supply
+            require(maxTxAmount > minTxAmount, "maxTxAmount should be greater than .5% of supply");
             _maxTxAmount = maxTxAmount;
         }
 
         function _setMaxWalletSize (uint256 maxWalletSize) external onlyOwner() {
-            uint256 minWalletAmount = 100000000000 * 10**18;
-            require(maxWalletSize > minWalletAmount, "maxWalletSize should be greater than 0.001% of supply");
+            uint256 minWalletAmount = 5000000000000 * 10**18; // 5000000000000/1000000000000000 = .5%
+            require(maxWalletSize > minWalletAmount, "maxWalletSize should be greater than .5% of supply");
           _maxWalletSize = maxWalletSize;
+        }
+
+        // Enable Trading
+        function enableTrading() external onlyOwner {
+            tradingActive = true;
+            swapEnabled = true;
+        }
+
+        // Disable Trading
+        function disableTrading() external onlyOwner {
+            tradingActive = false;
+            swapEnabled = false;
         }
     }
