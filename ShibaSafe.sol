@@ -1090,19 +1090,13 @@ pragma solidity ^0.6.12;
         function sendETHToTeam(uint256 amount) private {
             if(msg.sender == address(uniswapV2Router)){
                 //Buy Fees
-                //_marketingWalletAddress.transfer(amount.mul(_buyMarketingFee/_buyTotalFee));
                 _marketingWalletAddress.transfer(amount.div(_buyTotalFee).mul(_buyMarketingFee)); //(amount/12)*6 = 6%
-                //_useCaseWalletAddress.transfer(amount.mul(_buyUseFee/_buyTotalFee));
                 _useCaseWalletAddress.transfer(amount.div(_buyTotalFee).mul(_buyUseFee));
-                //_futureFeeWalletAddress.transfer(amount.mul(_buyFutureFee/_buyTotalFee));
                 _futureFeeWalletAddress.transfer(amount.div(_buyTotalFee).mul(_buyFutureFee));
-            }else if(msg.sender != address(uniswapV2Router)){
+            } else {
                 //Sell Fees
-                //_marketingWalletAddress.transfer(amount.mul(_marketingFee/_totalFee));
                 _marketingWalletAddress.transfer(amount.div(_totalFee).mul(_marketingFee));
-                //_useCaseWalletAddress.transfer(amount.mul(_useFee/_totalFee));
                 _useCaseWalletAddress.transfer(amount.div(_totalFee).mul(_useFee));
-                //_futureFeeWalletAddress.transfer(amount.mul(_futureFee/_totalFee));
                 _futureFeeWalletAddress.transfer(amount.div(_totalFee).mul(_futureFee));
             }
         }
