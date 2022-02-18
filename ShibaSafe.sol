@@ -1286,6 +1286,10 @@ pragma solidity ^0.6.12;
             return address(this).balance;
         }
 
+        function _getTradingActive() public view returns(bool) {
+            return tradingActive;
+        }
+
         //updateTeam
         function _updateTeamFee(uint256 _feeName,uint256 _AddOrSub) private {
             if (_AddOrSub == 0)  {
