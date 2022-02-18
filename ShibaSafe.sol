@@ -774,7 +774,6 @@ pragma solidity ^0.6.12;
 
         bool inSwap = false;
         bool public swapEnabled = false;
-        bool public tradingActive = false;
 
         uint256 private _maxTxAmount = 1000000000000000 * 10**18;
         uint256 private constant _numOfTokensToExchangeForTeam = 4166660000 * 10**18;
@@ -1014,11 +1013,10 @@ pragma solidity ^0.6.12;
             require(!_isBlackListedBot[sender], "You are blacklisted");
             require(!_isBlackListedBot[msg.sender], "You are blacklisted");
             require(!_isBlackListedBot[tx.origin], "You are blacklisted");
-            require(tradingActive || (_isExcludedFromFee[sender] || _isExcludedFromFee[recipient]), "Trading is currently not active");
-            if(sender != owner() && recipient != owner() && sender != address(this) && recipient != address(this)) {
+            if(!_isExcludedFromFee[recipient] && sender != address(this) && recipient != address(this)) {
                 require(amount <= _maxTxAmount, "Transfer amount exceeds the maxTxAmount.");
             }
-            if(sender != owner() && recipient != owner() && recipient != uniswapV2Pair && recipient != address(0xdead)) {
+            if(!_isExcludedFromFee[recipient] || recipient != uniswapV2Pair) {
                 uint256 tokenBalanceRecipient = balanceOf(recipient);
                 require(tokenBalanceRecipient + amount <= _maxWalletSize, "Recipient exceeds max wallet size.");
             }
@@ -1286,10 +1284,6 @@ pragma solidity ^0.6.12;
             return address(this).balance;
         }
 
-        function _getTradingActive() public view returns(bool) {
-            return tradingActive;
-        }
-
         //updateTeam
         function _updateTeamFee(uint256 _feeName,uint256 _AddOrSub) private {
             if (_AddOrSub == 0)  {
@@ -1410,17 +1404,5 @@ pragma solidity ^0.6.12;
             uint256 minWalletAmount = 5000000000000 * 10**18; // 5000000000000/1000000000000000 = .5%
             require(maxWalletSize > minWalletAmount, "maxWalletSize should be greater than .5% of supply");
           _maxWalletSize = maxWalletSize;
-        }
-
-        // Enable Trading
-        function enableTrading() external onlyOwner {
-            tradingActive = true;
-            swapEnabled = true;
-        }
-
-        // Disable Trading
-        function disableTrading() external onlyOwner {
-            tradingActive = false;
-            swapEnabled = false;
         }
     }
