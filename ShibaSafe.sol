@@ -1053,7 +1053,7 @@ pragma solidity ^0.6.12;
             }
 
             // since the staking wallet must be funded by native token, dont swap for ETH
-            if(msg.sender != address(uniswapV2Router)){ // sell
+            if(msg.sender != address(uniswapV2Router) && takeFee){ // sell
                 //uint256 takeStakingReward = amount.sub(amount.mul(_stakingFee/_totalFee));
                 uint256 takeStakingReward = amount.div(100).mul(_stakingFee);
                 _stakingWalletAddress.transfer(takeStakingReward);
